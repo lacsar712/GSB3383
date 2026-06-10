@@ -1,0 +1,18 @@
+{
+  "name": "campus-online-ordering-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.26.1",
+  "scripts": {
+    "lint": "node scripts/lint.mjs && mvn -q -DskipTests compile",
+    "test": "mvn -q test",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed --project=chromium",
+    "test:all": "pnpm test && pnpm test:e2e",
+    "build": "mvn -q -DskipTests package",
+    "clean": "mvn -q clean"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

@@ -1,0 +1,516 @@
+{
+  "project_name": "campus-online-ordering-mvp",
+  "project_name_cn": "在线订餐系统（MVP）",
+  "description": "面向课程设计的在线订餐系统 MVP：用户可注册/登录，浏览菜品、加入购物车并下单；管理员可维护菜品与处理订单。重点完成 MySQL 数据库设计与 Java Web 应用实现，使用 JDK 24 + Tomcat 10+ + MySQL 8.0，采用会话(Session)鉴权与 JDBC 访问数据库。",
+  "target_users": [
+    "普通用户：在线浏览菜单、下单、查看订单",
+    "管理员：维护菜单、查看并处理订单"
+  ],
+  "tech_stack": {
+    "frontend": "JSP + JSTL + Bootstrap 5 + 原生 JavaScript(基于 fetch 调用后端 API)",
+    "backend": "Java (JDK 24) + Tomcat 10+ + Servlet + JDBC + JSON(手写/轻量库) + HttpSession",
+    "database": "MySQL 8.0 (InnoDB, 外键约束, 索引)",
+    "reasoning": "与课程环境(JDK24/Tomcat10/MySQL8)直接匹配；Servlet+JDBC便于展示数据库设计、SQL与事务；JSP适合快速完成可运行的全栈页面与表单；Session鉴权无需依赖付费或外部服务。"
+  },
+  "core_features": [
+    {
+      "module": "用户与鉴权",
+      "features": [
+        "用户注册：用户名唯一校验，密码加密存储",
+        "用户登录/退出：基于 HttpSession 保存登录态",
+        "角色区分：USER/ADMIN 控制访问管理员功能"
+      ],
+      "priority": "P0"
+    },
+    {
+      "module": "菜单浏览",
+      "features": [
+        "菜品列表展示：名称、价格、描述、是否可售",
+        "菜品搜索/筛选：按关键字(名称)过滤",
+        "菜品详情查看：展示完整描述与图片链接(可选)"
+      ],
+      "priority": "P0"
+    },
+    {
+      "module": "购物车与下单",
+      "features": [
+        "购物车管理：加入、修改数量、删除、清空",
+        "提交订单：填写联系人/电话/地址并生成订单与订单明细",
+        "订单列表与详情：查看历史订单与状态"
+      ],
+      "priority": "P0"
+    },
+    {
+      "module": "管理员后台",
+      "features": [
+        "菜品管理：新增/编辑/上下架(可售状态)",
+        "订单管理：查看订单列表与详情",
+        "订单状态流转：PLACED -> CONFIRMED -> COMPLETED / CANCELED"
+      ],
+      "priority": "P1"
+    }
+  ],
+  "pages": [
+    {
+      "path": "/login",
+      "name": "登录",
+      "description": "用户登录进入系统",
+      "key_elements": [
+        "用户名输入框",
+        "密码输入框",
+        "登录按钮",
+        "跳转注册链接"
+      ]
+    },
+    {
+      "path": "/register",
+      "name": "注册",
+      "description": "新用户注册账号",
+      "key_elements": [
+        "用户名输入框(唯一校验提示)",
+        "密码输入框",
+        "确认密码输入框",
+        "注册按钮",
+        "返回登录链接"
+      ]
+    },
+    {
+      "path": "/menu",
+      "name": "菜单",
+      "description": "浏览与搜索菜品并加入购物车",
+      "key_elements": [
+        "搜索框(按名称关键字)",
+        "菜品卡片列表(名称/价格/描述/可售标记)",
+        "加入购物车按钮(含数量默认1)",
+        "顶部导航(购物车/订单/退出)"
+      ]
+    },
+    {
+      "path": "/cart",
+      "name": "购物车",
+      "description": "管理购物车商品并发起下单",
+      "key_elements": [
+        "购物车明细表(菜品/单价/数量/小计)",
+        "数量增减与删除按钮",
+        "总金额展示",
+        "下单表单(联系人/电话/地址)",
+        "提交订单按钮"
+      ]
+    },
+    {
+      "path": "/orders",
+      "name": "我的订单",
+      "description": "查看用户订单列表与订单详情",
+      "key_elements": [
+        "订单列表(订单号/时间/金额/状态)",
+        "订单详情展开(明细行/联系人/地址)",
+        "取消订单按钮(仅 PLACED/CONFIRMED 可取消，按规则实现)"
+      ]
+    },
+    {
+      "path": "/admin/menu",
+      "name": "后台-菜品管理",
+      "description": "管理员维护菜品信息与可售状态",
+      "key_elements": [
+        "菜品列表(编辑/上下架)",
+        "新增菜品表单(名称/价格/描述/图片链接/可售)",
+        "保存按钮",
+        "权限不足提示"
+      ]
+    },
+    {
+      "path": "/admin/orders",
+      "name": "后台-订单管理",
+      "description": "管理员查看并处理订单状态",
+      "key_elements": [
+        "订单列表(用户/时间/金额/状态)",
+        "订单详情(明细/联系人/电话/地址)",
+        "状态更新按钮(CONFIRMED/COMPLETED/CANCELED)",
+        "权限不足提示"
+      ]
+    }
+  ],
+  "data_models": [
+    {
+      "name": "User",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED PK AI",
+          "description": "用户主键"
+        },
+        {
+          "name": "username",
+          "type": "VARCHAR(50) UNIQUE NOT NULL",
+          "description": "登录用户名，唯一"
+        },
+        {
+          "name": "password_hash",
+          "type": "VARCHAR(255) NOT NULL",
+          "description": "密码哈希(如 SHA-256+salt 或 PBKDF2)"
+        },
+        {
+          "name": "role",
+          "type": "ENUM('USER','ADMIN') NOT NULL DEFAULT 'USER'",
+          "description": "用户角色，用于权限控制"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME NOT NULL",
+          "description": "创建时间"
+        }
+      ]
+    },
+    {
+      "name": "MenuItem",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED PK AI",
+          "description": "菜品主键"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(100) NOT NULL",
+          "description": "菜品名称"
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR(500) NOT NULL",
+          "description": "菜品描述"
+        },
+        {
+          "name": "price",
+          "type": "DECIMAL(10,2) NOT NULL",
+          "description": "菜品价格"
+        },
+        {
+          "name": "image_url",
+          "type": "VARCHAR(255) NOT NULL",
+          "description": "图片链接(可用占位链接)"
+        },
+        {
+          "name": "is_available",
+          "type": "TINYINT(1) NOT NULL DEFAULT 1",
+          "description": "是否可售(1可售/0下架)"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME NOT NULL",
+          "description": "创建时间"
+        }
+      ]
+    },
+    {
+      "name": "CartItem",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED PK AI",
+          "description": "购物车项主键"
+        },
+        {
+          "name": "user_id",
+          "type": "BIGINT UNSIGNED NOT NULL",
+          "description": "所属用户ID(User.id)"
+        },
+        {
+          "name": "menu_item_id",
+          "type": "BIGINT UNSIGNED NOT NULL",
+          "description": "菜品ID(MenuItem.id)"
+        },
+        {
+          "name": "quantity",
+          "type": "INT NOT NULL",
+          "description": "数量(>=1)"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME NOT NULL",
+          "description": "加入时间"
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED PK AI",
+          "description": "订单主键"
+        },
+        {
+          "name": "user_id",
+          "type": "BIGINT UNSIGNED NOT NULL",
+          "description": "下单用户ID(User.id)"
+        },
+        {
+          "name": "status",
+          "type": "ENUM('PLACED','CONFIRMED','COMPLETED','CANCELED') NOT NULL DEFAULT 'PLACED'",
+          "description": "订单状态"
+        },
+        {
+          "name": "total_amount",
+          "type": "DECIMAL(10,2) NOT NULL",
+          "description": "订单总金额(由明细汇总)"
+        },
+        {
+          "name": "contact_name",
+          "type": "VARCHAR(50) NOT NULL",
+          "description": "联系人姓名"
+        },
+        {
+          "name": "contact_phone",
+          "type": "VARCHAR(30) NOT NULL",
+          "description": "联系人电话"
+        },
+        {
+          "name": "delivery_address",
+          "type": "VARCHAR(255) NOT NULL",
+          "description": "送餐地址"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME NOT NULL",
+          "description": "下单时间"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME NOT NULL",
+          "description": "更新时间(状态变更等)"
+        }
+      ]
+    },
+    {
+      "name": "OrderItem",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BIGINT UNSIGNED PK AI",
+          "description": "订单明细主键"
+        },
+        {
+          "name": "order_id",
+          "type": "BIGINT UNSIGNED NOT NULL",
+          "description": "所属订单ID(Order.id)"
+        },
+        {
+          "name": "menu_item_id",
+          "type": "BIGINT UNSIGNED NOT NULL",
+          "description": "菜品ID(MenuItem.id)，用于追溯"
+        },
+        {
+          "name": "item_name_snapshot",
+          "type": "VARCHAR(100) NOT NULL",
+          "description": "下单时菜品名称快照(避免后续改名影响历史)"
+        },
+        {
+          "name": "unit_price_snapshot",
+          "type": "DECIMAL(10,2) NOT NULL",
+          "description": "下单时单价快照"
+        },
+        {
+          "name": "quantity",
+          "type": "INT NOT NULL",
+          "description": "购买数量"
+        },
+        {
+          "name": "line_total",
+          "type": "DECIMAL(10,2) NOT NULL",
+          "description": "行小计=unit_price_snapshot*quantity"
+        }
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "AC-CORE-001",
+      "category": "core",
+      "given": "用户已完成注册且账号有效",
+      "when": "用户在登录页输入正确用户名与密码并提交",
+      "then": "系统创建会话并跳转到菜单页，页面显示“退出/购物车/订单”入口"
+    },
+    {
+      "id": "AC-CORE-002",
+      "category": "core",
+      "given": "用户已登录且菜单存在至少1个可售菜品",
+      "when": "用户在菜单页点击“加入购物车”并进入购物车页提交订单(填写联系人/电话/地址)",
+      "then": "系统生成订单与订单明细，购物车被清空，订单列表出现新订单且金额与明细汇总一致"
+    },
+    {
+      "id": "AC-EDGE-001",
+      "category": "edge",
+      "given": "用户已登录且购物车中已有某菜品数量为1",
+      "when": "用户将该菜品数量减少到0或输入非正整数并提交更新",
+      "then": "系统阻止非法数量：数量为0时删除该项；非正整数时返回校验错误并保持原数量"
+    },
+    {
+      "id": "AC-ERROR-001",
+      "category": "error",
+      "given": "用户未登录或会话已失效",
+      "when": "用户直接访问 /cart 或调用 /api/orders 创建订单接口",
+      "then": "系统返回未授权(页面跳转至登录页或 API 返回 401)，且不产生任何订单数据"
+    },
+    {
+      "id": "AC-USABILITY-001",
+      "category": "usability",
+      "given": "用户处于菜单页",
+      "when": "用户在搜索框输入关键字并提交/触发搜索",
+      "then": "列表仅展示名称包含关键字的菜品，且搜索条件在页面上可见并可清空恢复全部"
+    },
+    {
+      "id": "AC-CORE-003",
+      "category": "core",
+      "given": "管理员账号已登录且存在订单状态为 PLACED 的订单",
+      "when": "管理员在后台订单管理页将订单状态更新为 CONFIRMED",
+      "then": "订单状态被持久化更新，用户在“我的订单”页面刷新后可见状态变化与更新时间变化"
+    },
+    {
+      "id": "AC-ERROR-002",
+      "category": "error",
+      "given": "管理员在后台新增或编辑菜品时输入价格为负数或非数字",
+      "when": "管理员提交保存",
+      "then": "系统返回校验错误提示，不写入数据库且不影响现有菜品数据"
+    }
+  ],
+  "api_endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "description": "用户注册：username/password；创建 USER 角色账号",
+      "auth": "none"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "description": "用户登录：创建 HttpSession 并返回当前用户信息",
+      "auth": "none"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "description": "退出登录：销毁会话",
+      "auth": "required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/menu-items",
+      "description": "获取菜品列表：支持 query 参数 q(按名称模糊查询)，仅返回可售菜品给普通用户",
+      "auth": "required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/cart",
+      "description": "获取当前用户购物车明细与金额汇总",
+      "auth": "required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/cart/items",
+      "description": "加入购物车：menuItemId, quantity(默认1)；同菜品则累加数量",
+      "auth": "required"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/cart/items/{id}",
+      "description": "更新购物车项数量：quantity；quantity<=0 则删除该项",
+      "auth": "required"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/cart/items/{id}",
+      "description": "删除购物车项",
+      "auth": "required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "description": "创建订单：contactName/contactPhone/deliveryAddress；从购物车生成 Order 与 OrderItem(事务)，并清空购物车",
+      "auth": "required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders",
+      "description": "获取当前用户订单列表(含基础字段，可选带明细开关 includeItems=true)",
+      "auth": "required"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/menu-items/{id}",
+      "description": "管理员编辑菜品：name/description/price/imageUrl/isAvailable",
+      "auth": "required"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/menu-items",
+      "description": "管理员新增菜品",
+      "auth": "required"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/orders",
+      "description": "管理员查看订单列表：可按 status 筛选",
+      "auth": "required"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/orders/{id}/status",
+      "description": "管理员更新订单状态：status in [CONFIRMED, COMPLETED, CANCELED]，并写入 updated_at",
+      "auth": "required"
+    }
+  ],
+  "out_of_scope": [
+    "在线支付、退款、第三方支付接口",
+    "多商家/多门店、地理位置与配送范围计算",
+    "配送员端、实时配送追踪",
+    "优惠券、满减、会员积分、评价系统",
+    "短信/邮件通知、第三方登录",
+    "复杂报表与数据分析、打印小票",
+    "高并发分布式架构、消息队列、缓存系统"
+  ],
+  "implementation_milestones": [
+    {
+      "phase": "Phase 1 - 数据库设计与初始化",
+      "tasks": [
+        "完成 E-R 设计并落表：User/MenuItem/CartItem/Order/OrderItem",
+        "建立主键、外键、必要索引(如 CartItem.user_id, Order.user_id, OrderItem.order_id)",
+        "准备初始化数据：1个管理员账号、若干菜品",
+        "编写 SQL 脚本：schema.sql + seed.sql"
+      ],
+      "acceptance": [
+        "在 MySQL 8.0 成功创建所有表且外键生效",
+        "可通过 SQL 插入并查询到种子数据",
+        "订单与明细、购物车与用户/菜品之间关联查询正确"
+      ]
+    },
+    {
+      "phase": "Phase 2 - 后端 Servlet + JDBC API",
+      "tasks": [
+        "搭建 Tomcat Web 项目结构，配置数据库连接(JDBC)与统一异常/JSON响应",
+        "实现鉴权：注册/登录/退出，Session 存储 userId 与 role",
+        "实现菜单与购物车 API：列表、加入、修改、删除",
+        "实现下单事务：从购物车生成订单与明细并清空购物车(同一事务)",
+        "实现管理员 API：菜品增改、订单列表与状态更新"
+      ],
+      "acceptance": [
+        "Postman/浏览器调用 API 可完成完整链路：登录->加购->下单->查询订单",
+        "未登录访问受保护 API 返回 401；非管理员访问管理 API 返回 403",
+        "下单接口具备事务一致性：任一步失败不产生半成品订单且购物车不被清空"
+      ]
+    },
+    {
+      "phase": "Phase 3 - JSP 页面与端到端联调",
+      "tasks": [
+        "实现 JSP 页面：登录/注册/菜单/购物车/我的订单/后台菜品/后台订单",
+        "页面通过 fetch 调用后端 API，展示错误提示与基本交互",
+        "输入校验：必填、价格与数量合法性、用户名唯一提示",
+        "完成基本验收用例测试与演示脚本"
+      ],
+      "acceptance": [
+        "普通用户可在页面端完成浏览、加购、下单、查看订单",
+        "管理员可在页面端完成新增/编辑/上下架菜品与处理订单状态",
+        "所有验收标准(acceptance_criteria)均可在页面端复现并通过"
+      ]
+    }
+  ]
+}

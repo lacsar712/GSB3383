@@ -1,0 +1,27 @@
+{
+  "id": 3383,
+  "tech_type": "fullstack",
+  "prompt": "在线订餐系统 \n\n课程设计的目的和要求： \n《数据库应用系统》课程设计是软件工程专业非常重要的实践性环节之一，是学完《数 \n据库原理及应用》课程后一次全面的综合练习。本课程设计主要在于巩固学生对数据库基本 \n原理和基础理论的理解，掌握数据库应用系统设计开发的基本方法，进一步提高学生综合运 \n用所学知识的能力本次课程设计的重点是完成数据库的设计和实现，兼顾应用程序开发。数据库管理系统不限。 \n\njdk24  tomcat10+  mysql8.0",
+  "framework": "not_specified",
+  "backend": "Java",
+  "database": "MySQL",
+  "platform": "",
+  "scores": {
+    "clarity": 4,
+    "complexity": 3.0,
+    "verifiability": 1.8,
+    "manual_verify": 1,
+    "automatable": 3,
+    "total": 3.65,
+    "grade": "B",
+    "reproducibility": 1,
+    "type_weight": 3.25,
+    "weighted_total": 11.86,
+    "complexity_rule": 3.0,
+    "complexity_llm": 3.0,
+    "feasibility": 3,
+    "feasibility_confidence": 0.72
+  },
+  "impl_score": 12.78,
+  "selection_review": null
+}
